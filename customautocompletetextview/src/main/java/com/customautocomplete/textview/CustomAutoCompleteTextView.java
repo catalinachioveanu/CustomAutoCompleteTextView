@@ -1,6 +1,7 @@
 package com.customautocomplete.textview;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.AttributeSet;
@@ -23,23 +24,27 @@ import java.util.ArrayList;
 public class CustomAutoCompleteTextView extends LinearLayout
 {
 	private ArrayList<String> suggestions;
-	private int itemBackground = R.drawable.animated_button_background;
 	private LinearLayout container;
+	 private OnClickListener itemClickListener;
 
-	public CustomAutoCompleteTextView(Context context, ArrayList<String> suggestions)
+	public CustomAutoCompleteTextView(Context context, ArrayList<String> suggestions, int resource)
 	{
 		super(context);
 		this.suggestions = suggestions;
+		initialize(context, resource);
 	}
 
 	public CustomAutoCompleteTextView(Context context, AttributeSet attrs)
 	{
 		super(context, attrs);
 		suggestions = new ArrayList<>();
-		initialize(context);
+		TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.CustomAutoCompleteTextView);
+		int resourceId = a.getResourceId(R.styleable.CustomAutoCompleteTextView_resource, 0);
+		a.recycle();
+		initialize(context, resourceId);
 	}
 
-	private void initialize(Context context)
+	private void initialize(Context context, final int resource)
 	{
 		LayoutInflater inflater = LayoutInflater.from(context);
 		final View view = inflater.inflate(R.layout.layout_customautocompletetextview, this);
@@ -57,7 +62,7 @@ public class CustomAutoCompleteTextView extends LinearLayout
 				TextView textView = new TextView(view.getContext());
 				textView.setGravity(Gravity.CENTER);
 				textView.setSingleLine(true);
-				textView.setBackgroundResource(itemBackground);
+				textView.setBackgroundResource(resource);
 				return textView;
 			}
 		};
@@ -69,6 +74,7 @@ public class CustomAutoCompleteTextView extends LinearLayout
 			{
 				editText.setText(((TextView) ((TextSwitcher) v).getCurrentView()).getText());
 				editText.setSelection(editText.getText().length());
+				itemClickListener.onClick(v);
 			}
 		};
 
@@ -184,15 +190,6 @@ public class CustomAutoCompleteTextView extends LinearLayout
 	}
 
 	/**
-	 * Sets the background resource for the suggestion words.
-	 * @param itemBackground The background resource for the suggestion items
-	 */
-	public void setItemBackground(int itemBackground)
-	{
-		this.itemBackground = itemBackground;
-	}
-
-	/**
 	 * Changes the visibility of the word suggestions
 	 * @param visible If true the suggestions will be visible otherwise they will be hidden
 	 */
@@ -206,5 +203,10 @@ public class CustomAutoCompleteTextView extends LinearLayout
 		{
 			container.setVisibility(GONE);
 		}
+	}
+
+	public void setItemClickListener(OnClickListener itemClickListener)
+	{
+		this.itemClickListener = itemClickListener;
 	}
 }
